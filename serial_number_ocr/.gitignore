@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+.env/
+
+# Dataset
+data/
+*.tar
+*.zip
+
+# Models
+models/
+*.pt
+
+# Logs
+runs/
+*.log
+
+# OS
+.DS_Store
