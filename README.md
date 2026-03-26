@@ -1,6 +1,6 @@
 # Automated Serial Number Recognition System
 
-This repository contains the machine learning pipeline for automated serial number recognition from industrial metal surfaces. The current implementation lives in `serial_number_ocr/` and covers dataset conversion, YOLOv8 training, and inference for detecting and reading engraved numeric serial numbers from images.
+This repository contains the machine learning pipeline for automated serial number recognition from industrial metal surfaces. The current implementation lives in `serial_number_ocr/` and covers dataset conversion, YOLOv12 training, and inference for detecting and reading engraved numeric serial numbers from images.
 
 The repository is structured to support a larger product build. The ML pipeline is already isolated as its own module, and separate `backend/` and `frontend/` folders can be added at the repository root by teammates without changing the ML project layout.
 
@@ -38,7 +38,7 @@ The inference pipeline is designed for engraved serial numbers and includes crop
 Implemented now:
 
 - dataset conversion scripts
-- YOLOv8 training entrypoints
+- YOLOv11 training entrypoints
 - modular OCR inference pipeline
 - API-ready inference output
 

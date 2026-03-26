@@ -28,7 +28,7 @@ def main() -> None:
         raise FileNotFoundError("No detection training images found. Run scripts/convert_dataset.py first.")
 
     data_config = build_yolo_data_config(images_dir, [TEXT_CLASS_NAME], file_names)
-    model = YOLO("yolov8n.pt")
+    model = YOLO("yolo11n.pt")
     training_root = Path(tempfile.mkdtemp(prefix="detection_train_"))
     train_results = model.train(
         data=str(data_config),
