@@ -24,7 +24,7 @@ from utils.io_utils import (
     yolo_line,
 )
 
-LIMIT = 2000
+LIMIT = None
 MAX_IMAGE_DIMENSION = 2000
 
 
@@ -256,10 +256,10 @@ def convert_ocr_sample(image: np.ndarray, annotation: WordAnnotation, image_name
     return True
 
 
-def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[dict[str, Any]], counters: dict[str, int]) -> None:
+def convert_split(dataset_name: str, dataset_split: Iterable[dict[str, Any]], counters: dict[str, int]) -> None:
     count = 0
     for row_index, example in enumerate(dataset_split):
-        if count >= LIMIT:
+        if LIMIT is not None and row_index >= LIMIT:
             break
         count += 1
         try:
@@ -272,31 +272,30 @@ def convert_split(dataset_name: str, split_name: str, dataset_split: Iterable[di
             if not words:
                 continue
 
-            detection_name = f"{dataset_name}_{split_name}_{counters['detection']:07d}"
+            detection_name = f"{dataset_name}_{counters['detection']:07d}"
             counters["detection"] += 1
             convert_detection_sample(image, words, detection_name)
 
             for word_index, annotation in enumerate(words):
-                ocr_name = f"{dataset_name}_{split_name}_{row_index:07d}_{word_index:03d}"
+                ocr_name = f"{dataset_name}_{row_index:07d}_{word_index:03d}"
                 if convert_ocr_sample(image, annotation, ocr_name):
                     counters["ocr"] += 1
             if count % 100 == 0:
-                print(f"Processed {count} samples from {dataset_name}/{split_name}")
+                print(f"Processed {count} samples from {dataset_name}")
         except Exception:
             counters["skipped"] += 1
             continue
 
-    print(f"Processed {count} samples from {dataset_name}/{split_name}")
+    print(f"Processed {count} samples from {dataset_name}")
 
 
 def main() -> None:
     prepare_output_dirs()
     synth = load_ocr_datasets()
     counters = {"detection": 0, "ocr": 0, "skipped": 0}
+    print(f"Dataset size loaded: {len(synth)}")
 
-    for dataset_name, dataset in (("synth", synth),):
-        for split_name, split_data in dataset.items():
-            convert_split(dataset_name, split_name, split_data, counters)
+    convert_split("synth", synth, counters)
 
     print(f"Detection samples: {counters['detection']}")
     print(f"OCR samples: {counters['ocr']}")
