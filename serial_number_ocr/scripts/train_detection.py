@@ -6,11 +6,6 @@ from pathlib import Path
 
 from ultralytics import YOLO
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from serial_number_ocr.utils.config import (
     DEFAULT_BATCH_SIZE,
     DEFAULT_EPOCHS,
@@ -20,6 +15,13 @@ from serial_number_ocr.utils.config import (
     TEXT_CLASS_NAME,
 )
 from serial_number_ocr.utils.io_utils import build_yolo_data_config, ensure_dir
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
 
 
 def main() -> None:

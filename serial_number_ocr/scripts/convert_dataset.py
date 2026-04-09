@@ -9,11 +9,6 @@ from typing import Any, Iterable
 import cv2
 import numpy as np
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
 from serial_number_ocr.load_dataset import load_ocr_datasets
 from serial_number_ocr.utils.config import DETECTION_DATA_DIR, IMAGE_SUFFIX, LABEL_SUFFIX, OCR_DATA_DIR
 from serial_number_ocr.utils.io_utils import (
@@ -25,6 +20,13 @@ from serial_number_ocr.utils.io_utils import (
     save_image,
     yolo_line,
 )
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+
 
 LIMIT = None
 MAX_IMAGE_DIMENSION = 2000
