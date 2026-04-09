@@ -9,7 +9,7 @@ from typing import Any, Iterable
 import cv2
 import numpy as np
 
-from serial_number_ocr.load_dataset import load_ocr_datasets
+from load_dataset import load_ocr_datasets
 from serial_number_ocr.utils.config import DETECTION_DATA_DIR, IMAGE_SUFFIX, LABEL_SUFFIX, OCR_DATA_DIR
 from serial_number_ocr.utils.io_utils import (
     clip_box,
@@ -28,7 +28,8 @@ if str(REPO_ROOT) not in sys.path:
 
 
 
-LIMIT = None
+
+LIMIT = 10000
 MAX_IMAGE_DIMENSION = 2000
 
 
@@ -295,11 +296,11 @@ def convert_split(dataset_name: str, dataset_split: Iterable[Any], counters: dic
 
 def main() -> None:
     prepare_output_dirs()
-    synth = load_ocr_datasets()
+    dataset = load_ocr_datasets()
     counters = {"detection": 0, "ocr": 0, "skipped": 0}
-    print(f"Dataset size loaded: {len(synth)}")
+    print(type(dataset))
 
-    convert_split("synth", synth, counters)
+    convert_split("synth", dataset, counters)
 
     print(f"Detection samples: {counters['detection']}")
     print(f"OCR samples: {counters['ocr']}")

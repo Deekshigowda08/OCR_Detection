@@ -101,7 +101,7 @@ This step:
 - downloads the configured datasets
 - converts them into YOLO detection and OCR datasets
 - stores output under the configured data directory
-- uses Hugging Face split slicing to avoid downloading the full dataset
+- uses Hugging Face streaming mode to avoid downloading the full dataset
 
 ### 7. Train The Detection Model
 
@@ -158,8 +158,8 @@ print(result)
 ## Colab Execution Notes
 
 - Use a GPU runtime in Colab. Do not use TPU for this project.
-- Dataset loading is limited with Hugging Face split slicing, for example `split="train[:30000]"`.
-- This prevents full dataset download and reduces runtime and storage pressure in Colab.
+- This project uses Hugging Face streaming mode to process large datasets without downloading them fully, ensuring efficient memory and storage usage.
+- Dataset conversion is limited to `10000` streamed samples for controlled Colab execution.
 - The ICDAR dataset has been removed from the Colab workflow due to instability and dataset mismatch issues.
 - Very large images are skipped during conversion to reduce RAM crashes in notebook sessions.
 
