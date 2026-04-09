@@ -112,7 +112,9 @@ This produces:
 
 - `models/detection/best.pt`
 
-If `SERIAL_OCR_MODELS_DIR` is set, the model will be saved under that external models directory instead.
+If `SERIAL_OCR_MODELS_DIR` is set, the model is also saved under that external models directory. The training script mirrors the trained file back into:
+
+- `serial_number_ocr/models/detection/best.pt`
 
 ### 8. Train The OCR Model
 
@@ -124,7 +126,9 @@ This produces:
 
 - `models/ocr/best.pt`
 
-If `SERIAL_OCR_MODELS_DIR` is set, the model will be saved under that external models directory instead.
+If `SERIAL_OCR_MODELS_DIR` is set, the model is also saved under that external models directory. The training script mirrors the trained file back into:
+
+- `serial_number_ocr/models/ocr/best.pt`
 
 ### 9. Run Inference In Colab
 
@@ -159,7 +163,7 @@ print(result)
 
 ## Usage
 
-Example:
+Use the main pipeline entrypoint function `pipeline.run_pipeline.run_inference`:
 
 ```python
 from pipeline.run_pipeline import run_inference
@@ -174,6 +178,11 @@ After training, the model weights are expected at:
 
 - `models/detection/best.pt`
 - `models/ocr/best.pt`
+
+Exact repository paths:
+
+- `serial_number_ocr/models/detection/best.pt`
+- `serial_number_ocr/models/ocr/best.pt`
 
 You can load them directly with Ultralytics:
 
@@ -193,7 +202,7 @@ result = run_inference("image.jpg")
 print(result["text"])
 ```
 
-The pipeline automatically loads the trained detection and OCR models from the `models/` directory.
+The `pipeline.run_pipeline.run_inference` function automatically loads the trained detection and OCR models from the `models/` directory.
 
 ## Using The Trained Models In A Backend
 
@@ -204,6 +213,10 @@ from pipeline.run_pipeline import run_inference
 
 result = run_inference("image.jpg")
 ```
+
+This function lives in:
+
+- `pipeline/run_pipeline.py`
 
 This returns a backend-ready dictionary:
 
@@ -222,6 +235,16 @@ Recommended backend flow:
 2. call `run_inference(image_path)`
 3. return the result as JSON from the API
 
+The backend does not need to load `best.pt` manually if it uses `run_inference()`. The pipeline loads these files automatically:
+
+- `serial_number_ocr/models/detection/best.pt`
+- `serial_number_ocr/models/ocr/best.pt`
+
+If the backend project lives outside `serial_number_ocr/`, either:
+
+1. keep the trained model files in those exact repository paths, or
+2. set `SERIAL_OCR_MODELS_DIR` before importing the pipeline so it can locate the weights elsewhere
+
 Minimal backend example:
 
 ```python
@@ -229,6 +252,21 @@ from pipeline.run_pipeline import run_inference
 
 def predict_serial_number(image_path: str) -> dict:
     return run_inference(image_path)
+```
+
+Example API-style usage:
+
+```python
+from pipeline.run_pipeline import run_inference
+
+def handle_uploaded_image(saved_image_path: str) -> dict:
+    result = run_inference(saved_image_path)
+    return {
+        "serial_number": result["text"],
+        "confidence": result["confidence"],
+        "boxes": result["boxes"],
+        "processing_time": result["processing_time"],
+    }
 ```
 
 If the backend stores trained weights outside the repository, set:
@@ -245,6 +283,24 @@ before importing or calling the pipeline. The expected files remain:
 - `ocr/best.pt`
 
 inside that configured models directory.
+
+## Expected Result Quality
+
+If you follow the README flow exactly, the code will:
+
+- download the configured dataset
+- convert it into YOLO training data
+- train and save the detector and OCR models
+- run inference through the final pipeline
+
+You should get a correctly structured output dictionary. Actual OCR accuracy depends on:
+
+- dataset quality
+- the 2000-sample training limit used for Colab stability
+- training time and Colab GPU session quality
+- the similarity between test images and training data
+
+So the output format is guaranteed by the code, but recognition accuracy still depends on the trained model quality.
 
 ## Output Format
 
