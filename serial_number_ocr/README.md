@@ -58,8 +58,8 @@ In Google Colab:
 ### 2. Clone The Repository
 
 ```bash
-!git clone <YOUR_GITHUB_REPO_LINK>
-%cd MiniProj06Sem/serial_number_ocr
+!git clone https://github.com/ShashankMk031/OCR_Detection.git
+%cd OCR_Detection/serial_number_ocr
 ```
 
 ### 3. Install Dependencies
