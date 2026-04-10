@@ -45,6 +45,118 @@ Install dependencies from the project root:
 pip install -r requirements.txt
 ```
 
+## Running Locally From The Beginning
+
+This section assumes you are starting on a local Windows or Linux machine with Python installed and, ideally, an NVIDIA GPU.
+
+### 1. Open A Terminal In The Project
+
+Move into the ML project folder:
+
+```bash
+cd serial_number_ocr
+```
+
+### 2. Create And Activate A Virtual Environment
+
+Windows:
+
+```bash
+python -m venv venv
+venv\Scripts\activate
+```
+
+Linux:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+pip install ultralytics datasets opencv-python
+```
+
+### 4. Verify GPU Availability
+
+The training scripts print whether CUDA is available when they start. For local NVIDIA training, make sure your PyTorch installation supports CUDA.
+
+### 5. Convert The Dataset
+
+```bash
+python scripts/convert_dataset.py
+```
+
+This step:
+
+- streams the SynthText dataset from Hugging Face
+- processes only a limited number of samples for stability
+- creates:
+  - `data/detection/images`
+  - `data/detection/labels`
+  - `data/ocr/images`
+  - `data/ocr/labels`
+
+### 6. Train The Detection Model
+
+```bash
+python scripts/train_detection.py
+```
+
+For local GPU training, this script is configured for a lower-memory profile:
+
+- `imgsz=512`
+- `batch=8`
+- `workers=2`
+
+If a checkpoint exists at:
+
+- `models/detection/run/weights/last.pt`
+
+the script resumes automatically. If a CUDA out-of-memory error occurs, it retries with `batch=4`.
+
+### 7. Train The OCR Model
+
+```bash
+python scripts/train_ocr.py
+```
+
+This follows the same local-GPU profile and resume logic. If a checkpoint exists at:
+
+- `models/ocr/run/weights/last.pt`
+
+the script resumes automatically.
+
+### 8. Final Model Locations
+
+After training completes, the final models are copied to:
+
+- `models/detection/best.pt`
+- `models/ocr/best.pt`
+
+Resume checkpoints are also kept at:
+
+- `models/detection/last.pt`
+- `models/ocr/last.pt`
+
+### 9. Run Inference Locally
+
+```bash
+python pipeline/run_pipeline.py --image test.jpg
+```
+
+Or in Python:
+
+```python
+from pipeline.run_pipeline import run_inference
+
+result = run_inference("test.jpg")
+print(result)
+```
+
 ## Running In Google Colab
 
 ### 1. Open Colab With GPU
