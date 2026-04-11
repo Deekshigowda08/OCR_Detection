@@ -1,9 +1,0 @@
-{
-  "include": [
-    "serial_number_ocr"
-  ],
-  "extraPaths": [
-    ".",
-    "./serial_number_ocr"
-  ]
-}
