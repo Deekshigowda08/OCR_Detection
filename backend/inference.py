@@ -3,7 +3,7 @@ import numpy as np
 from ultralytics import YOLO
 from utils import preprocess_for_ocr, encode_image_base64
 
-MODEL_PATH = "../New_ocr/yolov8n.pt"
+MODEL_PATH = "../runs/detect/train3/weights/best.pt"
 model = None
 
 try:
@@ -105,10 +105,12 @@ def run_inference(img_bgr):
         cv2.putText(annotated, char, (x1, max(y1-10, 10)), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
         
     base64_out = encode_image_base64(annotated)
+    preprocessed_base64 = encode_image_base64(preprocessed)
     
     return {
         "text": detected_string,
         "boxes": ret_boxes,
         "confidences": confs,
-        "annotated_image": f"data:image/png;base64,{base64_out}"
+        "annotated_image": f"data:image/png;base64,{base64_out}",
+        "preprocessed_image": f"data:image/png;base64,{preprocessed_base64}"
     }

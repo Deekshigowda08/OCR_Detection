@@ -97,8 +97,15 @@ export default function Home() {
                 </div>
               ) : result && !result.error ? (
                 <div className="flex flex-col items-center w-full">
-                  <div className="w-full bg-slate-100 rounded-2xl p-4 shadow-inner mb-6 border-2 border-slate-200">
-                    <img src={result.annotated_image} alt="Annotated Detections" className="w-full rounded-xl object-contain" style={{maxHeight: "300px"}} />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-6">
+                    <div className="bg-slate-100 rounded-2xl p-4 shadow-inner border-2 border-slate-200 flex flex-col items-center">
+                      <p className="text-xs font-bold text-slate-400 uppercase mb-2">Original Input</p>
+                      {file && <img src={URL.createObjectURL(file)} alt="Original Input" className="w-full rounded-xl object-contain" style={{maxHeight: "250px"}} />}
+                    </div>
+                    <div className="bg-slate-100 rounded-2xl p-4 shadow-inner border-2 border-slate-200 flex flex-col items-center">
+                      <p className="text-xs font-bold text-slate-400 uppercase mb-2">YOLO Detection</p>
+                      <img src={result.annotated_image} alt="Annotated Detections" className="w-full rounded-xl object-contain" style={{maxHeight: "250px"}} />
+                    </div>
                   </div>
                   
                   <div className="bg-emerald-100 border-2 border-emerald-400 w-full rounded-2xl p-6 text-center shadow-md">
@@ -156,6 +163,27 @@ export default function Home() {
                 <h3 className="text-xl font-bold text-slate-600 mb-4">mAP (50) Timeline</h3>
                 <img src={metrics.map_graph} alt="mAP Graph" className="w-full rounded-xl mix-blend-multiply" />
               </div>
+              
+              {metrics.confusion_matrix && (
+                <div className="bg-slate-50 p-4 rounded-3xl shadow-inner border border-slate-200 text-center col-span-1 md:col-span-2">
+                  <h3 className="text-xl font-bold text-slate-600 mb-4">Confusion Matrix</h3>
+                  <img src={metrics.confusion_matrix} alt="Confusion Matrix" className="w-full rounded-xl mix-blend-multiply" />
+                </div>
+              )}
+              
+              {metrics.pr_curve && (
+                <div className="bg-slate-50 p-4 rounded-3xl shadow-inner border border-slate-200 text-center">
+                  <h3 className="text-xl font-bold text-slate-600 mb-4">Precision-Recall Curve</h3>
+                  <img src={metrics.pr_curve} alt="PR Curve" className="w-full rounded-xl mix-blend-multiply" />
+                </div>
+              )}
+              
+              {metrics.f1_curve && (
+                <div className="bg-slate-50 p-4 rounded-3xl shadow-inner border border-slate-200 text-center">
+                  <h3 className="text-xl font-bold text-slate-600 mb-4">F1 Score Curve</h3>
+                  <img src={metrics.f1_curve} alt="F1 Curve" className="w-full rounded-xl mix-blend-multiply" />
+                </div>
+              )}
             </div>
           </div>
         )}

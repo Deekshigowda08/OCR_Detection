@@ -15,18 +15,33 @@ def decode_image(image_bytes):
     return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 def preprocess_for_ocr(img):
-    # Grayscale
+    # 1. Grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
-    # CLAHE Handle uneven lighting
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    enhanced = clahe.apply(gray)
+    # 2. Bilateral Filtering
+    # Crucial for metallic surfaces: Blurs out rust/scratches while keeping character edges razor sharp
+    blur = cv2.bilateralFilter(gray, d=9, sigmaColor=75, sigmaSpace=75)
     
-    # Light Gaussian blur for noise
-    blurred = cv2.GaussianBlur(enhanced, (3, 3), 0)
+    # 3. CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    # Neutralizes extreme specular highlights (glare) and deep shadows on curved metal
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))
+    contrast = clahe.apply(blur)
     
-    # Reconvert back to BGR 3-channel for standard YOLO ingestion
-    out_bgr = cv2.cvtColor(blurred, cv2.COLOR_GRAY2BGR)
+    # 4. Adaptive Gaussian Thresholding
+    # Otsu fails on unevenly lit metal. Adaptive isolation calculates thresholds locally per 21x21 block
+    thresh = cv2.adaptiveThreshold(
+        contrast, 255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        21, 11
+    )
+    
+    # 5. Salt-and-Pepper Noise Removal
+    # Median blurring mathematically removes the isolated speckles caused by rust under adaptive thresholding
+    cleaned = cv2.medianBlur(thresh, 3)
+    
+    # Reconvert back to BGR 3-channel for YOLO ingestion
+    out_bgr = cv2.cvtColor(cleaned, cv2.COLOR_GRAY2BGR)
     return out_bgr
 
 def generate_metrics_graphs():
@@ -81,8 +96,21 @@ def generate_metrics_graphs():
 
     loss_b64 = base64.b64encode(buf_loss.getvalue()).decode('utf-8')
     map_b64 = base64.b64encode(buf_map.getvalue()).decode('utf-8')
+
+    def encode_file_base64(filepath):
+        if not os.path.exists(filepath):
+            return None
+        with open(filepath, "rb") as file_obj:
+            return base64.b64encode(file_obj.read()).decode('utf-8')
+            
+    conf_matrix_b64 = encode_file_base64("../runs/detect/train3/confusion_matrix.png")
+    pr_curve_b64 = encode_file_base64("../runs/detect/train3/PR_curve.png")
+    f1_curve_b64 = encode_file_base64("../runs/detect/train3/F1_curve.png")
     
     return {
         "loss_graph": f"data:image/png;base64,{loss_b64}", 
-        "map_graph": f"data:image/png;base64,{map_b64}"
+        "map_graph": f"data:image/png;base64,{map_b64}",
+        "confusion_matrix": f"data:image/png;base64,{conf_matrix_b64}" if conf_matrix_b64 else None,
+        "pr_curve": f"data:image/png;base64,{pr_curve_b64}" if pr_curve_b64 else None,
+        "f1_curve": f"data:image/png;base64,{f1_curve_b64}" if f1_curve_b64 else None
     }
