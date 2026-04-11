@@ -10,3 +10,5 @@ serial_number_ocr/models/
 *.png
 .ipynb_checkpoints/
 .DS_Store
+__pycache__/
+New_ocr/dataset
