@@ -14,6 +14,53 @@ def decode_image(image_bytes):
     np_arr = np.frombuffer(image_bytes, np.uint8)
     return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
+def get_text_region_candidates(img, top_k=3):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+    # a) Edge detection
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blurred, 50, 150)
+    
+    # b) Morphological closing to group text edges
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (15, 5))
+    closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
+    
+    contours, _ = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    candidates = []
+    img_area = img.shape[0] * img.shape[1]
+    
+    for c in contours:
+        x, y, w, h = cv2.boundingRect(c)
+        area = w * h
+        # c) Filter contours
+        if area < 0.01 * img_area or area > 0.9 * img_area:
+            continue
+        if w < h: # text regions are horizontal
+            continue
+        aspect_ratio = w / float(h)
+        if aspect_ratio < 2.0 or aspect_ratio > 10.0:
+            continue
+        candidates.append((x, y, w, h, area))
+        
+    candidates.sort(key=lambda c: c[4], reverse=True)
+    top_candidates = candidates[:top_k]
+    
+    cropped_regions = []
+    padding = 15
+    for (x, y, w, h, area) in top_candidates:
+        x1 = max(0, x - padding)
+        y1 = max(0, y - padding)
+        x2 = min(img.shape[1], x + w + padding)
+        y2 = min(img.shape[0], y + h + padding)
+        cropped_regions.append({
+            "image": img[y1:y2, x1:x2],
+            "offset": (x1, y1),
+            "source": "heuristic"
+        })
+        
+    return cropped_regions
+
 def preprocess_for_ocr(img):
     # 1. Grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
