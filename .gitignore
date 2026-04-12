@@ -2,8 +2,8 @@ venv/
 serial_number_ocr/__pycache__/
 serial_number_ocr/data
 serial_number_ocr/models/
-*.pt
-*.pth
+#*.pt
+#*.pth
 *.tar
 *.zip
 *.jpg
